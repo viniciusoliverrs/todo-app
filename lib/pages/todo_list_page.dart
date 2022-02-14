@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:todo_list/models/todo.dart';
 
+import '../repositories/todo_repository.dart';
 import '../widgets/todo_list_item.dart';
 
 class TodoListPage extends StatefulWidget {
@@ -13,6 +14,17 @@ class TodoListPage extends StatefulWidget {
 class _TodoListPageState extends State<TodoListPage> {
   List<Todo> todos = [];
   final TextEditingController todo = TextEditingController();
+  final TodoRepository todoRepository = TodoRepository();
+  @override
+  void initState() {
+    super.initState();
+    todoRepository.getTodoList().then((value) => {
+          setState(() {
+            todos = value;
+          })
+        });
+  }
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -49,6 +61,7 @@ class _TodoListPageState extends State<TodoListPage> {
                           todos.add(model);
                         });
                         todo.clear();
+                        todoRepository.saveTodoList(todos);
                       },
                       style: ElevatedButton.styleFrom(
                         primary: Color(0xff00d7f3),
@@ -131,6 +144,7 @@ class _TodoListPageState extends State<TodoListPage> {
     setState(() {
       todos.clear();
     });
+    todoRepository.saveTodoList(todos);
   }
 
   void onDelete(Todo todo) {
@@ -138,6 +152,7 @@ class _TodoListPageState extends State<TodoListPage> {
     setState(() {
       todos.remove(todo);
     });
+    todoRepository.saveTodoList(todos);
     ScaffoldMessenger.of(context).clearSnackBars();
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
